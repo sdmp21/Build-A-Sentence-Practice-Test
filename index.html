@@ -1,0 +1,473 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>iBT Writing Mock Test – Build a Sentence</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+/* Layout concept: a quiet test-room page. Sticky bar with the section timer,
+   one question at a time in a conversation card, word bank underneath. */
+:root{
+  --bg:#F3F3F9;
+  --surface:#FFFFFF;
+  --ink:#1F1D4F;
+  --ink-2:#5A597F;
+  --line:#DCDCEE;
+  --accent:#3D3BB3;
+  --accent-ink:#FFFFFF;
+  --accent-soft:#E7E7F8;
+  --warn:#B4381F;
+  --ok:#1F7A4D;
+  --f-display:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;
+  --f-body:"Source Sans 3",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --r:10px;
+  color-scheme:light dark;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#12112B;
+    --surface:#1B1A3D;
+    --ink:#EDEDFA;
+    --ink-2:#A6A5CB;
+    --line:#32315F;
+    --accent:#9795F5;
+    --accent-ink:#12112B;
+    --accent-soft:#2A2960;
+    --warn:#FF9378;
+    --ok:#6FD3A0;
+  }
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 1.0625rem/1.55 var(--f-body)}
+h1,h2,h3,p{margin:0}
+button{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+
+/* Top bar */
+.top{position:sticky;top:0;z-index:5;background:var(--surface);border-bottom:1px solid var(--line)}
+.top-in{max-width:52rem;margin:0 auto;padding:.65rem 1rem;display:flex;gap:1rem;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.brand{font:700 1.3rem var(--f-display);letter-spacing:.03em;text-transform:uppercase}
+.brand span{font-weight:500;color:var(--ink-2)}
+.meta{display:flex;align-items:baseline;gap:1.25rem;font-family:var(--f-display);text-transform:uppercase;letter-spacing:.05em}
+.progress{font-weight:600;font-size:1rem;color:var(--ink-2)}
+.timer{display:flex;align-items:baseline;gap:.5rem}
+.timer small{font-weight:600;font-size:.95rem;color:var(--ink-2)}
+.timer b{font-size:1.75rem;font-weight:700;font-variant-numeric:tabular-nums;min-width:3.3ch}
+.timer.low b{color:var(--warn)}
+
+main{max-width:52rem;margin:0 auto;padding:1.5rem 1rem 4rem}
+
+.eyebrow{font:600 1rem var(--f-display);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2)}
+h1{font:700 clamp(2.2rem,6vw,3.2rem)/1.02 var(--f-display);text-transform:uppercase;letter-spacing:.01em;text-wrap:balance}
+.q-title{font:700 1.6rem/1.15 var(--f-display);color:var(--accent);text-wrap:balance}
+.lead{font-size:1.15rem;max-width:40rem}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:1.25rem}
+.stack{display:grid;gap:1.1rem}
+
+/* Start screen */
+.facts{display:flex;flex-wrap:wrap;gap:.5rem 1.5rem;font:600 1.1rem var(--f-display);letter-spacing:.04em;text-transform:uppercase;color:var(--accent)}
+.how{margin:0;padding-left:1.2rem;display:grid;gap:.35rem}
+form{display:grid;gap:1rem}
+label{display:grid;gap:.3rem;font-weight:600}
+label small{font-weight:400;color:var(--ink-2)}
+input[type=text],input[type=email]{width:100%;font:inherit;padding:.65rem .8rem;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)}
+.err{color:var(--warn);font-weight:600}
+
+/* Buttons */
+.btn{font:700 1.05rem var(--f-display);letter-spacing:.06em;text-transform:uppercase;padding:.7rem 1.3rem;border-radius:8px;border:1.5px solid var(--accent);background:var(--accent);color:var(--accent-ink);cursor:pointer;text-decoration:none;display:inline-block;text-align:center}
+.btn.ghost{background:transparent;color:var(--accent)}
+.btn:hover:not(:disabled){filter:brightness(1.08)}
+.btn:disabled{opacity:.4;cursor:default}
+.row{display:flex;gap:.75rem;flex-wrap:wrap;align-items:center;justify-content:space-between}
+.row-btns{display:flex;gap:.6rem;flex-wrap:wrap}
+
+/* Conversation */
+.convo{display:grid;gap:.75rem}
+.turn{display:grid;grid-template-columns:3rem 1fr;gap:.9rem;align-items:center;padding:.9rem 1rem;border:1px solid var(--line);border-radius:var(--r);background:var(--surface)}
+.avatar{width:3rem;height:3rem;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center}
+.turn.reply .avatar{background:var(--line);color:var(--ink-2)}
+.say{font-size:1.2rem}
+.sentence{font-size:1.2rem;line-height:2.5;white-space:pre-wrap;overflow-wrap:anywhere}
+.slot{display:inline-block;vertical-align:middle;min-width:5rem;height:2.1rem;margin:0 .1rem;border-bottom:2px solid var(--ink-2)}
+.slot.next{border-bottom-color:var(--accent);background:var(--accent-soft)}
+button.slot.filled{min-width:0;padding:0 .65rem;border:1.5px solid var(--accent);border-radius:7px;background:var(--accent-soft);color:var(--ink);cursor:pointer;font-weight:600;line-height:1}
+button.slot.filled:hover{background:var(--surface)}
+
+/* Word bank */
+.bank{display:flex;flex-wrap:wrap;justify-content:center;gap:.55rem;padding:1rem;border:1px dashed var(--ink-2);border-radius:var(--r)}
+.chip{font:600 1.05rem var(--f-body);padding:.45rem .95rem;min-height:2.6rem;border-radius:8px;border:1.5px solid var(--accent);background:var(--surface);color:var(--accent);cursor:pointer}
+.chip:hover:not(:disabled){background:var(--accent-soft)}
+.chip:disabled{opacity:.35;cursor:default;border-style:dashed;background:transparent}
+
+/* Question strip */
+.dots{display:flex;flex-wrap:wrap;gap:.35rem}
+.dots button{width:2.3rem;height:2.3rem;border-radius:6px;border:1px solid var(--line);background:var(--surface);color:var(--ink-2);font:600 1rem var(--f-display);cursor:pointer}
+.dots button.done{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+.dots button.cur{outline:2px solid var(--ink);outline-offset:1px}
+
+.callout{border:1.5px solid var(--warn);border-radius:var(--r);padding:1rem;background:var(--surface);display:grid;gap:.8rem}
+
+/* Thank you */
+.thanks{display:grid;gap:1.2rem;padding:1.75rem 1.25rem}
+.status{color:var(--ink-2)}
+.status.ok{color:var(--ok);font-weight:600}
+.status.bad{color:var(--warn);font-weight:600}
+
+@media (max-width:520px){
+  .turn{grid-template-columns:2.5rem 1fr;gap:.7rem}
+  .avatar{width:2.5rem;height:2.5rem}
+  .sentence,.say{font-size:1.1rem}
+  .slot{min-width:3.6rem}
+}
+@media (prefers-reduced-motion:no-preference){
+  .chip,.btn,button.slot{transition:background .12s,filter .12s}
+}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="top-in">
+    <div class="brand">iBT Writing <span>Mock Test</span></div>
+    <div class="meta" id="meta" hidden>
+      <span class="progress" id="progress"></span>
+      <div class="timer" id="timer" role="timer"><small>Time left</small><b id="timerVal">06:00</b></div>
+    </div>
+  </div>
+</header>
+<main id="app"><noscript>This test needs JavaScript turned on.</noscript></main>
+
+<script>
+(function(){
+"use strict";
+
+/* ===== Settings you edit ===== */
+const CONFIG = {
+  // Web app URL from Google Apps Script (see README.md). Responses are sent here.
+  ENDPOINT: "PASTE_YOUR_APPS_SCRIPT_WEB_APP_URL_HERE",
+  // Link to the Google Classroom assignment post for the Write an Email and
+  // Write for an Academic Discussion tasks. Shown on the thank-you page.
+  CLASSROOM_URL: "PASTE_YOUR_GOOGLE_CLASSROOM_POST_LINK_HERE",
+  // Build a Sentence time limit in seconds (6 minutes).
+  SECONDS: 360
+};
+
+/* ===== Questions: "{}" marks a blank; chips is the word bank ===== */
+const ITEMS = [
+  { say:"I’m planning a surprise party for my roommate.",
+    tpl:"What a coincidence—{} {} {} {} {} my roommate.",
+    chips:["for","the","same","as","I’m","doing"] },
+  { say:"How are your Polish lessons going?",
+    tpl:"I’m actually learning on my own {} {} {} {} {} conversations.",
+    chips:["to","that","simulate","uses AI","with an app","how"] },
+  { say:"Tonight, I’m going to try the new restaurant right across from campus.",
+    tpl:"{} {} last week {} {} {} {}.",
+    chips:["with","from","went","I","the hiking club","try","my friends"] },
+  { say:"I have to finish my homework before dinner.",
+    tpl:"{} {} {} {} {} {}?",
+    chips:["subjects","assignments in","you","have","do","what"] },
+  { say:"I need to pick up some groceries after class.",
+    tpl:"{} {} {} {} {}?",
+    chips:["you","store","going to","are","which"] },
+  { say:"The student association is organizing a charity event next month.",
+    tpl:"I {} the event {} {} {} {}.",
+    chips:["organize","the children’s","support","will","hospital","hear"] },
+  { say:"I’m thinking about redecorating my dorm room.",
+    tpl:"{} {} {} {} {}?",
+    chips:["you","are","considering","what","style"] },
+  { say:"I missed the lecture this morning.",
+    tpl:"{} {} {} {} {} {} someone?",
+    chips:["you","get","from","notes","did","the"] },
+  { say:"I’m going to attend the career workshop on Sunday.",
+    tpl:"{} {} {} {} {} {} {} gain?",
+    chips:["there","are","any","specific","you’re","skills","hoping to"] },
+  { say:"I have to prepare for the big presentation next week.",
+    tpl:"{} {} {} {} {} {}?",
+    chips:["your","have","finished","creating","slides","you"] }
+];
+
+/* ===== Helpers ===== */
+const $ = (s, r) => (r || document).querySelector(s);
+const app = $("#app");
+const AVATAR = '<svg viewBox="0 0 24 24" width="62%" height="62%" aria-hidden="true"><circle cx="12" cy="8.5" r="4" fill="currentColor"/><path d="M4 21c0-4.4 3.6-7.5 8-7.5s8 3.1 8 7.5z" fill="currentColor"/></svg>';
+const isSet = v => !!v && !/^PASTE_/.test(v);
+function esc(s){ return String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+function fmt(sec){ const m = Math.floor(sec/60), s = sec % 60; return String(m).padStart(2,"0") + ":" + String(s).padStart(2,"0"); }
+function uid(){ try { return crypto.randomUUID(); } catch(e) { return "id-" + Date.now().toString(36) + Math.random().toString(36).slice(2,10); } }
+
+const state = {
+  screen: "start",
+  itemIdx: 0,
+  name: "", email: "",
+  slots: ITEMS.map(it => Array(it.tpl.split("{}").length - 1).fill(null)),
+  startedAt: 0, endsAt: 0, secondsUsed: 0, timedOut: false,
+  payload: null,
+  submissionId: uid()
+};
+let tick = null;
+
+function isDone(n){ return state.slots[n].every(v => v !== null); }
+function doneCount(){ return ITEMS.reduce((c, _, n) => c + (isDone(n) ? 1 : 0), 0); }
+
+function assemble(n){
+  const it = ITEMS[n], parts = it.tpl.split("{}");
+  let out = "";
+  parts.forEach((p, k) => {
+    out += p;
+    if (k < parts.length - 1) { const v = state.slots[n][k]; out += v === null ? "____" : it.chips[v]; }
+  });
+  if (it.tpl.indexOf("{}") === 0) out = out.charAt(0).toUpperCase() + out.slice(1);
+  return out;
+}
+
+/* ===== Screens ===== */
+function setChrome(inTest){
+  $("#meta").hidden = !inTest;
+  if (inTest) $("#progress").textContent = doneCount() + " of " + ITEMS.length + " complete";
+}
+
+function renderStart(){
+  setChrome(false);
+  app.innerHTML = `
+  <div class="stack">
+    <div class="stack">
+      <p class="eyebrow">Practice Test · Writing</p>
+      <h1>Build a Sentence</h1>
+      <p class="lead">Complete a short conversation by putting words and phrases in the right order. This section is part of the Writing practice test.</p>
+      <div class="facts"><span>10 questions</span><span>About 6 minutes</span></div>
+    </div>
+    <div class="card stack">
+      <ul class="how">
+        <li>Tap a word in the word bank to place it in the next blank.</li>
+        <li>Tap a word inside the sentence to take it back out.</li>
+        <li>You may not need every word in the bank.</li>
+        <li>The timer starts when you press Start. When time runs out, your answers are submitted automatically.</li>
+      </ul>
+    </div>
+    <form class="card" id="startForm" novalidate>
+      <label>Your name
+        <input type="text" id="name" autocomplete="name" required>
+      </label>
+      <label>Email <small>(optional)</small>
+        <input type="email" id="email" autocomplete="email">
+      </label>
+      <p class="err" id="startErr" hidden></p>
+      <div><button class="btn" type="submit">Start</button></div>
+    </form>
+  </div>`;
+  $("#startForm").addEventListener("submit", ev => {
+    ev.preventDefault();
+    const n = $("#name").value.trim(), em = $("#email").value.trim();
+    const err = $("#startErr");
+    if (!n) { err.textContent = "Please enter your name to start."; err.hidden = false; $("#name").focus(); return; }
+    if (em && !/^\S+@\S+\.\S+$/.test(em)) { err.textContent = "That email address doesn’t look right. Check it or leave it blank."; err.hidden = false; $("#email").focus(); return; }
+    state.name = n; state.email = em;
+    startTest();
+  });
+}
+
+function renderTest(focusSel){
+  setChrome(true);
+  const i = state.itemIdx, it = ITEMS[i], arr = state.slots[i];
+  const used = new Set(arr.filter(v => v !== null));
+  const firstFree = arr.indexOf(null);
+  const parts = it.tpl.split("{}");
+  let sentence = "";
+  parts.forEach((p, k) => {
+    sentence += esc(p);
+    if (k < parts.length - 1) {
+      const v = arr[k];
+      if (v === null) sentence += `<span class="slot${k === firstFree ? " next" : ""}" role="img" aria-label="Blank ${k + 1}, empty"></span>`;
+      else sentence += `<button type="button" class="slot filled" data-act="unslot" data-k="${k}" title="Tap to remove">${esc(it.chips[v])}</button>`;
+    }
+  });
+  const chips = it.chips.map((c, k) => `<button type="button" class="chip" data-act="chip" data-k="${k}"${used.has(k) ? " disabled" : ""}>${esc(c)}</button>`).join("");
+  const dots = ITEMS.map((_, n) => `<button type="button" class="${isDone(n) ? "done" : ""}${n === i ? " cur" : ""}" data-act="goto" data-i="${n}" aria-label="Question ${n + 1}${isDone(n) ? ", complete" : ""}"${n === i ? ' aria-current="step"' : ""}>${n + 1}</button>`).join("");
+
+  app.innerHTML = `
+  <div class="stack">
+    <div class="stack">
+      <p class="eyebrow">Question ${i + 1} of ${ITEMS.length}</p>
+      <h2 class="q-title">Make an appropriate sentence.</h2>
+    </div>
+    <div class="convo">
+      <div class="turn"><span class="avatar">${AVATAR}</span><p class="say">${esc(it.say)}</p></div>
+      <div class="turn reply"><span class="avatar">${AVATAR}</span><p class="sentence">${sentence}</p></div>
+    </div>
+    <div class="bank" role="group" aria-label="Word bank">${chips}</div>
+    <div class="row">
+      <div class="row-btns">
+        <button type="button" class="btn ghost" data-act="prev"${i === 0 ? " disabled" : ""}>Previous</button>
+        <button type="button" class="btn" data-act="next"${i === ITEMS.length - 1 ? " disabled" : ""}>Next</button>
+      </div>
+      <button type="button" class="btn ghost" data-act="reset"${used.size === 0 ? " disabled" : ""}>Clear sentence</button>
+    </div>
+    <div class="dots" role="group" aria-label="Questions">${dots}</div>
+    <div class="row"><span></span><button type="button" class="btn" data-act="advance">Finish test</button></div>
+    <div class="callout" id="confirm" role="alertdialog" aria-labelledby="confirmText" hidden>
+      <p id="confirmText"></p>
+      <div class="row-btns">
+        <button type="button" class="btn ghost" data-act="confirm-no">Keep working</button>
+        <button type="button" class="btn" data-act="confirm-yes">Submit answers</button>
+      </div>
+    </div>
+  </div>`;
+  if (focusSel) { const f = $(focusSel); if (f) f.focus(); }
+}
+
+function renderThanks(){
+  setChrome(false);
+  const link = isSet(CONFIG.CLASSROOM_URL)
+    ? `<div class="stack">
+         <p>Next, complete the <strong>Write an Email</strong> and <strong>Write for an Academic Discussion</strong> tasks in Google Classroom.</p>
+         <div><a class="btn" href="${esc(CONFIG.CLASSROOM_URL)}" target="_blank" rel="noopener noreferrer">Go to the writing tasks</a></div>
+       </div>`
+    : "";
+  app.innerHTML = `
+  <section class="card thanks">
+    <h1>Thank you</h1>
+    <p class="lead" id="thanksLine"></p>
+    ${link}
+    <p class="status" id="status" role="status"></p>
+    <div class="row-btns" id="fail" hidden>
+      <button type="button" class="btn" data-act="retry">Try again</button>
+      <button type="button" class="btn ghost" data-act="download">Download a copy</button>
+    </div>
+  </section>`;
+  $("#thanksLine").textContent = (state.name ? state.name + ", you" : "You") + " have finished Build a Sentence.";
+}
+
+/* ===== Flow ===== */
+function startTest(){
+  state.screen = "test";
+  state.startedAt = Date.now();
+  state.endsAt = state.startedAt + CONFIG.SECONDS * 1000;
+  window.onbeforeunload = e => { e.preventDefault(); e.returnValue = ""; };
+  renderTest();
+  window.scrollTo(0, 0);
+  clearInterval(tick);
+  tick = setInterval(onTick, 250);
+  onTick();
+}
+
+function onTick(){
+  const left = Math.max(0, Math.ceil((state.endsAt - Date.now()) / 1000));
+  $("#timerVal").textContent = fmt(left);
+  $("#timer").classList.toggle("low", left <= 60);
+  if (left === 0) finish(true);
+}
+
+function finish(timedOut){
+  if (state.screen !== "test") return;
+  clearInterval(tick);
+  window.onbeforeunload = null;
+  state.timedOut = !!timedOut;
+  state.secondsUsed = Math.min(CONFIG.SECONDS, Math.round((Date.now() - state.startedAt) / 1000));
+  state.screen = "thanks";
+  state.payload = {
+    submissionId: state.submissionId,
+    submittedAt: new Date().toISOString(),
+    name: state.name,
+    email: state.email,
+    answers: ITEMS.map((_, n) => assemble(n)),
+    secondsUsed: state.secondsUsed,
+    timedOut: state.timedOut,
+    userAgent: navigator.userAgent
+  };
+  try { localStorage.setItem("ibt-build-sentence-last", JSON.stringify(state.payload)); } catch(e) {}
+  renderThanks();
+  window.scrollTo(0, 0);
+  submit();
+}
+
+function setStatus(text, kind){
+  const el = $("#status"); if (!el) return;
+  el.textContent = text; el.className = "status" + (kind ? " " + kind : "");
+}
+
+async function send(payload){
+  if (!isSet(https://script.google.com/macros/s/AKfycby1_5dnXWmrpCinywrFmuHxCy8lQJqtEHWiq59p-0yRew6uQnQ1Ei53JM63P4nF_ZlMrg/exec)) return { ok:false, reason:"not-configured" };
+  const body = JSON.stringify(payload);
+  const headers = { "Content-Type": "text/plain;charset=utf-8" }; // simple request, no CORS preflight
+  try {
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), 20000);
+    const r = await fetch(https://script.google.com/macros/s/AKfycby1_5dnXWmrpCinywrFmuHxCy8lQJqtEHWiq59p-0yRew6uQnQ1Ei53JM63P4nF_ZlMrg/exec, { method:"POST", headers, body, signal: ctrl.signal });
+    clearTimeout(t);
+    const j = await r.json();
+    return { ok: j && j.ok === true };
+  } catch(e) {
+    // The reply may be unreadable even when the sheet received the row.
+    // Send once more without reading the reply; the script ignores duplicate IDs.
+    try { await fetch(https://script.google.com/macros/s/AKfycby1_5dnXWmrpCinywrFmuHxCy8lQJqtEHWiq59p-0yRew6uQnQ1Ei53JM63P4nF_ZlMrg/exec, { method:"POST", mode:"no-cors", headers, body }); return { ok:true }; }
+    catch(e2) { return { ok:false, reason:"network" }; }
+  }
+}
+
+async function submit(){
+  const fail = $("#fail"); if (fail) fail.hidden = true;
+  setStatus("Saving your answers…");
+  const r = await send(state.payload);
+  if (r.ok) { setStatus("Your answers have been saved.", "ok"); return; }
+  if (r.reason === "not-configured") {
+    console.warn("CONFIG.ENDPOINT is not set. Answers were not sent anywhere.");
+    setStatus("Your answers could not be saved because this test is not connected to a response sheet yet. Download your copy and send it to your teacher.", "bad");
+  } else {
+    setStatus("We could not save your answers. Check your connection and try again, or download a copy.", "bad");
+  }
+  if (fail) fail.hidden = false;
+}
+
+function downloadCopy(){
+  const blob = new Blob([JSON.stringify(state.payload, null, 2)], { type:"application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "build-a-sentence-" + (state.name || "answers").replace(/[^\w-]+/g, "_") + ".json";
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+function showConfirm(){
+  const left = ITEMS.length - doneCount();
+  $("#confirmText").textContent = left > 0
+    ? left + (left === 1 ? " sentence is" : " sentences are") + " not complete. You can’t change your answers after you submit."
+    : "You can’t change your answers after you submit.";
+  const box = $("#confirm"); box.hidden = false;
+  box.scrollIntoView({ block:"nearest", behavior:"smooth" });
+}
+
+/* ===== Events ===== */
+app.addEventListener("click", e => {
+  const b = e.target.closest("[data-act]");
+  if (!b || b.disabled) return;
+  const i = state.itemIdx;
+  switch (b.dataset.act) {
+    case "chip": {
+      const k = +b.dataset.k, arr = state.slots[i], free = arr.indexOf(null);
+      if (free > -1 && arr.indexOf(k) === -1) arr[free] = k;
+      renderTest(".chip:not(:disabled)");
+      break;
+    }
+    case "unslot": state.slots[i][+b.dataset.k] = null; renderTest(); break;
+    case "reset": state.slots[i] = state.slots[i].map(() => null); renderTest(); break;
+    case "goto": state.itemIdx = +b.dataset.i; renderTest(); break;
+    case "prev": if (i > 0) { state.itemIdx--; renderTest(); } break;
+    case "next": if (i < ITEMS.length - 1) { state.itemIdx++; renderTest(); } break;
+    case "advance": showConfirm(); break;
+    case "confirm-no": $("#confirm").hidden = true; break;
+    case "confirm-yes": finish(false); break;
+    case "retry": submit(); break;
+    case "download": downloadCopy(); break;
+  }
+});
+
+renderStart();
+})();
+</script>
+</body>
+</html>
